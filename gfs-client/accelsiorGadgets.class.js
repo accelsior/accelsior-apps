@@ -2,6 +2,11 @@ class AccelsioGadgetsLoader {
     constructor() {
         console.log('AccelsioGadgetsLoader object successfully instantiated...');
     }
+
+    fnSetOverlayHeight() {
+        $("#_gfs_overlay").css("height", $("#_sweview").height());
+    }
+
     fnSetPA(Name, Value) {
         try {
             let oSvc = SiebelApp.S_App.GetService("SessionAccessService");
@@ -39,6 +44,10 @@ class AccelsioGadgetsLoader {
                 $("#_gfs_overlay").animate({"right": sHomeNewRight}, "fast");
                 fnSetPA("gadgets_overlay_status", sNewOverlayStatus);
             });
+            $("#_sweview").append($("<div/>", {id:"_gfs_overlay"}).get(0));
+			$("#_gfs_overlay").append($("<div/>", {id:"_gfs_tabs"}).get(0));
+			$("#_gfs_tabs").append($("<ul/>").get(0));
+			fnSetOverlayHeight();
         }
     }
 }
