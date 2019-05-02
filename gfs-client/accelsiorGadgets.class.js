@@ -3,26 +3,39 @@ class AccelsioGadgetsLoader {
         console.log('AccelsioGadgetsLoader object successfully instantiated...');
     }
 
-    fnSetOverlayHeight() {
-        $("#_gfs_overlay").css("height", $("#_sweview").height());
-    }
-
-    fnSetPA(Name, Value) {
+    fnAddTab(i, name) {
         try {
-            let oSvc = SiebelApp.S_App.GetService("SessionAccessService");
-            let psIn = SiebelApp.S_App.NewPropertySet();
-            let psOut = SiebelApp.S_App.NewPropertySet();
-            psIn.SetProperty("Name", Name);
-            psIn.SetProperty("Value", Value);
-            psOut = oSvc.InvokeMethod("SetProfileAttr", psIn);
+            const tabItem = $("<li>", {id: "_gfs_overlay_tab_" + name.replace(/\s/g, "_").toLowerCase(), class: "_gfs_overlay_tab"}).get(0);
+            const tablink = $("<a>", {href: `#_gfs_overlay_tab_${i}`}).get(0);
+            tablink.appendChild(document.createTextNode(name));
+            tabItem.append(tablink);
+            $("#_gfs_tabs").children("ul").append(tabItem);
+            $("#_gfs_tabs").append($("<div>", {id: `_gfs_overlay_tab_${i}`}).get(0));
         }
         catch (e) {
             console.log(e);
         }
-        finally {
-            psOut = null;
-            psIn = null;
-            oSvc = null;
+    }
+
+    fnAddFavorite (_id, _name, _object, _viewName, _applet) {
+        try{
+            const objectName = _object.replace(/[^a-z0-9]+/gi, "").toLowerCase();
+            const viewName = _viewName.replace(/\s/g, "+");
+            const appletName = _applet.replace(/\s/g, "+");
+            const li = $("<li>", {name: _name, id: _id, class: "_gfs_fav_list_item"}).get(0);
+            const div_handle = $('<div/>', {class: "_gfs_fav_list_item_handle"}).get(0);
+            const div_icon = $("<div/>", {class: `_gfs_fav_list_item_${objectName}`}).get(0);
+            const div_link = $("<div/>", {class: "_gfs_fav_list_item_link", v: viewName, o: objectName, a: appletName, i: _id}).get(0);
+            $(div_link).unbind('click');
+            $(div_link).click(() => SiebelApp.S_App.GotoView(viewName, null, `GotoView&SWEView=${viewName}&SWEApplet0=${appletName}&SWERowId0=${_id}`, null));
+            div_link.appendChild(document.createTextNode(_name));
+            li.appendChild(div_handle);
+            li.appendChild(div_icon);
+            li.appendChild(div_link);
+            return li;
+        }
+        catch (e) {
+            console.log(e);
         }
     }
 
@@ -31,7 +44,7 @@ class AccelsioGadgetsLoader {
         if ($("#_gfs_overlay").length === 0) {
             $("#_sweview").append($("<div>", {id:"_gfs_button"}).get(0));
             $('#_gfs_button').unbind('click');
-            $("#_gfs_button").click(function() {
+            $("#_gfs_button").click(() => {
                 //console.log("Button clicked!");
                 const iWidth = $("#_gfs_overlay").width();
                 const sBtnCurRight = $("#_gfs_button").css("right");
@@ -49,5 +62,28 @@ class AccelsioGadgetsLoader {
 			$("#_gfs_tabs").append($("<ul/>").get(0));
 			fnSetOverlayHeight();
         }
+    }
+}
+
+function fnSetOverlayHeight() {
+    $("#_gfs_overlay").css("height", $("#_sweview").height());
+}
+
+function fnSetPA(Name, Value) {
+    try {
+        let oSvc = SiebelApp.S_App.GetService("SessionAccessService");
+        let psIn = SiebelApp.S_App.NewPropertySet();
+        let psOut = SiebelApp.S_App.NewPropertySet();
+        psIn.SetProperty("Name", Name);
+        psIn.SetProperty("Value", Value);
+        psOut = oSvc.InvokeMethod("SetProfileAttr", psIn);
+    }
+    catch (e) {
+        console.log(e);
+    }
+    finally {
+        psOut = null;
+        psIn = null;
+        oSvc = null;
     }
 }
